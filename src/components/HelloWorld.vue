@@ -3,10 +3,11 @@
     <md-card class="txCss">
       <br>
       <ul>
-        <li v-for="branch in allBranches">
-          {{branch}}
+        <li v-for="(branch, key) in allBranches" :key="key">
+          {{key}} : {{branch}} <br> <br>
         </li>
       </ul>
+
       <ul>
         <li v-for="tx in hashedtxs">
           <md-card md-with-hover class="hashCards"> 
