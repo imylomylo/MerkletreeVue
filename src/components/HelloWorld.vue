@@ -3,9 +3,11 @@
     <md-card class="txCss">
       <br>
       <ul>
-        <p v-for="(tx, index) in hashedtxs" v-if="index%2==0">
-          <img class="arrowCards"src="./arrow.png">
-        </p><br>
+        <li v-for="branch in allBranches">
+          {{branch}}
+        </li>
+      </ul>
+      <ul>
         <li v-for="tx in hashedtxs">
           <md-card md-with-hover class="hashCards"> 
             {{tx}}
@@ -90,7 +92,7 @@ export default {
         //list of transactions hashed using double-SHA algorithm
         //aka leaf nodes
       ],
-      allBranches: [],
+      allBranches: {},
       branches: [
         //list of all the branches
         //b1: [
@@ -136,15 +138,17 @@ export default {
     async calcBranches() {
       //calculate the branches and display the list of hashes until there is only one hash left 
 
-      let rep = Math.ceil(Math.log2(this.txsCopy.length))
+      const rep = Math.ceil(Math.log2(this.txsCopy.length))
 
       for (let i = 0; i <= rep; i += 1) {
         if (this.hashedtxs.length == 1) {
           this.merkleRoot = this.hashedtxs[0]
-          console.log(`The Merkle Root is ${this.merkleRoot}`)
+          this.message = `The Merkle Root is ${this.merkleRoot}`
+          console.log(this.message)
         } else if (this.branches.length == 1) {
           this.merkleRoot = this.branches[0]
-          console.log(`The Merkle Root is ${this.merkleRoot}`)
+          this.message = `The Merkle Root is ${this.merkleRoot}`
+          console.log(this.message)
         } else if (this.hashedtxs.length > 1 && this.branches.length == 0) {
           this.hashedtxs.forEach((item, index) => {
             if (index % 2 == 0) {
@@ -153,12 +157,16 @@ export default {
               )
             }
           })
-          console.log(`Branch: ${(this.branchCounter += 1)}`)
+          this.message = `Branch: ${(this.branchCounter += 1)}`;
+          console.log(this.message)
           console.log(this.branches)
+          this.allBranches[this.branchCounter] = this.branches;
           if (this.branches.length > 1 && this.branches.length % 2 != 0) {
             this.makeElementsEven(this.branches)
-            console.log(`Now, Branch ${this.branchCounter} is: `)
+            this.message = `Branch: ${(this.branchCounter += 1)}`;
+            console.log(this.message)
             console.log(this.branches)
+            this.allBranches[this.branchCounter] = this.branches;
           }
         } else if (this.branches.length > 0) {
           this.branchesCopy = Array.from(this.branches)
@@ -170,15 +178,22 @@ export default {
               )
             }
           })
-          console.log(`Branch: ${(this.branchCounter += 1)}`)
+            this.message = `Branch: ${(this.branchCounter += 1)}`;
+            console.log(this.message)  
           console.log(this.branches)
+          this.allBranches[this.branchCounter] = this.branches;
           if (this.branches.length > 1 && this.branches.length % 2 != 0) {
             this.makeElementsEven(this.branches)
-            console.log(`Now, Branch ${this.branchCounter} is: `)
+            this.message = `Branch: ${(this.branchCounter += 1)}`;
+            console.log(this.message)  
             console.log(this.branches)
+            this.allBranches[this.branchCounter] = this.branches;
           }
         }
       }
+      this.message = `All the branches`;
+      console.log(this.message)  
+      console.log(this.allBranches)
     },
     makeElementsEven(arr) {
       if (arr.length > 1 && arr.length % 2 != 0) {
@@ -242,5 +257,6 @@ export default {
   horizontal-align: center;
 }
 p{
+  display: inline;
   }
 </style>
