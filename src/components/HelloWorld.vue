@@ -74,11 +74,11 @@ export default {
         "tx2",
         "tx3",
         "tx4",
-        /*"tx5",
+        "tx5",
         "tx6",
         "tx7",
         "tx8",
-        "tx9",
+        /*"tx9",
         "tx10",
         "tx11",*/
       ],
