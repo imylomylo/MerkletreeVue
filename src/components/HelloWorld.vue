@@ -1,55 +1,62 @@
 <template>
   <div id="app">
     <md-card class="txCss">
-      <br>
+      <br> <br>
+    <p class="title"> MerkleTree </p>
+    <br><br>
       <ul>
-        <li v-for="(branch, key) in allBranches" :key="key">
-          {{key}} : {{branch}} <br> <br>
+        <li v-for="branch in allBranches">
+           <!--<p>
+             Branch
+             3. Leaf nodes hashed using double-SHA algorithm
+           </p>-->
+          <ul>
+            <li v-for="tx in branch">
+              <md-card md-with-hover class="hashCards"> 
+                {{tx}}
+              </md-card>
+            </li>
+          </ul> <br>
         </li>
       </ul>
-
       <ul>
         <li v-for="tx in hashedtxs">
           <md-card md-with-hover class="hashCards"> 
             {{tx}}
-          </md-card>
-        </li>
+          </md-card> 
+        </li> <br>
+        <p v-if="hashedtxs.length!=0">
+          Leaf nodes hashed using double-SHA256 algorithm
+        </p>
+
       </ul>
-      <!--<ul>
-        <li v-for="tx in branches">
-          <md-card md-with-hover class="hashCards"> 
-            {{tx}}
-          </md-card>
-        </li>
-      </ul>
-      <p>
-        3. Leaf nodes hashed using double-SHA algorithm
-      </p>-->
-      <p>
-        3. Leaf nodes hashed using double-SHA algorithm
-      </p>
-      <ul v-if="txs.length%2!=0">
+      <ul v-if="txs.length>1 && txs.length%2!=0">
         <li v-for="tx in txsCopy">
           <md-card md-with-hover class="txCards"> 
             {{tx}}
           </md-card>
-        </li>
+        </li> <br>
+        <p>
+          Cannot build Merkle Tree for odd number of data elements. <br> 
+          Duplicating the last transaction to achieve an even number of data elements.
+        </p>
       </ul>
-      <p>
-        2. Cannot build Merkle Tree for odd number of data elements. <br> 
-        Duplicating the last transaction to achieve an even number of data elements.
-      </p>
       <ul>
-        <li v-for="tx in txs">
+        <li v-for="tx in txs" v-if="txs.length!=0">
+        <p v-if="txs.length==1">
+          {{message}} <br>
+        </p> 
           <md-card md-with-hover class="txCards"> 
             {{tx}}
-          </md-card>
-        </li>
+          </md-card> 
+        </li> <br>
+        <p v-if="txs.length!=0">
+        Transactions to be summarized
+        </p>
       </ul>
-      <p>
-        1. List of transactions to be summarized
-      </p>
-      <br>
+      <p class="subtitle" v-if="txs.length==0">
+      There are no transactions to be summarized
+      </p> <br>
     </md-card>
   </div>
 </template>
@@ -60,20 +67,20 @@ export default {
   name: 'MerkleTree',
   data () {
     return {
-      n: 0, // number of transactions
+      n: 3, // number of transactions
       txs: [
         //list of transactions
         "tx1",
         "tx2",
         "tx3",
         "tx4",
-        "tx5",
+        /*"tx5",
         "tx6",
         "tx7",
         "tx8",
         "tx9",
         "tx10",
-        "tx11",
+        "tx11",*/
       ],
       txsCopy: [
         /*copy of list of transactions
@@ -93,24 +100,22 @@ export default {
         //list of transactions hashed using double-SHA algorithm
         //aka leaf nodes
       ],
-      allBranches: {},
-      branches: [
-        //list of all the branches
-        //b1: [
-        //list of all the hashes obtained by concatenating two leaf nodes
-        //],
-        //b2: [
-        //list of all the hashes obtained by concatenating two nodes from branch 1
-        //]
-        //.
-        //.
-        //.
-        //bn: [
-        //list of all obtained by concatenating two nodes from branch n-1
-        //]
+      xyzBranches:[
+        //test branch
       ],
-      branchesCopy: [
+      allBranches: [
+        //[
+        //array containing all the corrected branches
+        //],
+	],
+      tempBranches: [
+	//array containing all the branches
+	],
+      branch: [
         //list of hashes obtained by concatenating two child nodes and hashing them with double-SHA algorithm
+      ],
+      branchCopy: [
+        //copy of branches
       ],
       branchCounter: 0, //value depends on the number of transactions
       merkleroot: '', //alphanumeric string
@@ -124,10 +129,11 @@ export default {
   methods: {
     async hashTxs() {
       //hash the transactions and display the leaf nodes
-      if (this.txs.length == 0) {
-        this.message = `There are no transactions to be summarized`
-      } 
-      else {
+      if (this.txs.length == 1) {
+        this.merkleroot = sha256(sha256(this.txs[0]))
+        this.message = `The Merkle Root is ${this.merkleroot}`  
+      }
+      else if (this.txs.length > 1){
         this.message = `Transactions to be summarized: ${this.txs}`
         this.txsCopy = Array.from(this.txs)
         this.makeElementsEven(this.txsCopy) 
@@ -137,69 +143,50 @@ export default {
       }
     },
     async calcBranches() {
-      //calculate the branches and display the list of hashes until there is only one hash left 
-
+      //calculate the branches 
       const rep = Math.ceil(Math.log2(this.txsCopy.length))
 
-      for (let i = 0; i <= rep; i += 1) {
-        if (this.hashedtxs.length == 1) {
-          this.merkleRoot = this.hashedtxs[0]
-          this.message = `The Merkle Root is ${this.merkleRoot}`
-          console.log(this.message)
-        } else if (this.branches.length == 1) {
-          this.merkleRoot = this.branches[0]
-          this.message = `The Merkle Root is ${this.merkleRoot}`
-          console.log(this.message)
-        } else if (this.hashedtxs.length > 1 && this.branches.length == 0) {
+      for ( let i=0; i <= rep; i++ ) {
+        if(this.branch.length == 0) {
           this.hashedtxs.forEach((item, index) => {
             if (index % 2 == 0) {
-              this.branches.push(
+              this.branch.push(
                 sha256(sha256(this.hashedtxs[index].concat(this.hashedtxs[index + 1])))
               )
             }
           })
           this.message = `Branch: ${(this.branchCounter += 1)}`;
           console.log(this.message)
-          console.log(this.branches)
-          this.allBranches[this.branchCounter] = this.branches;
-          if (this.branches.length > 1 && this.branches.length % 2 != 0) {
-            this.makeElementsEven(this.branches)
-            this.message = `Branch: ${(this.branchCounter += 1)}`;
-            console.log(this.message)
-            console.log(this.branches)
-            this.allBranches[this.branchCounter] = this.branches;
-          }
-        } else if (this.branches.length > 0) {
-          this.branchesCopy = Array.from(this.branches)
-          this.branches = []
-          this.branchesCopy.forEach((item, index) => {
+          console.log(this.branch)
+          this.allBranches.unshift(this.branch);
+          console.log(this.allBranches)
+        } else if(this.branch.length == 1) {
+          this.merkleRoot = this.branch[0]
+          this.message = `The Merkle Root is ${this.merkleRoot}`
+          console.log(this.message)
+        } else if(this.branch.length > 1) {
+          this.branchCopy = this.branch.slice(0)
+          this.branch = []
+          this.branchCopy.forEach((item, index) => {
             if (index % 2 == 0) {
-              this.branches.push(
-                sha256(sha256(this.branchesCopy[index].concat(this.branchesCopy[index + 1])))
+              this.branch.push(
+                sha256(sha256(this.branchCopy[index].concat(this.branchCopy[index + 1])))
               )
             }
           })
             this.message = `Branch: ${(this.branchCounter += 1)}`;
-            console.log(this.message)  
-          console.log(this.branches)
-          this.allBranches[this.branchCounter] = this.branches;
-          if (this.branches.length > 1 && this.branches.length % 2 != 0) {
-            this.makeElementsEven(this.branches)
-            this.message = `Branch: ${(this.branchCounter += 1)}`;
-            console.log(this.message)  
-            console.log(this.branches)
-            this.allBranches[this.branchCounter] = this.branches;
-          }
+            console.log(this.message)
+          console.log(this.branch)
+          this.allBranches.unshift(this.branch)
         }
-      }
-      this.message = `All the branches`;
-      console.log(this.message)  
-      console.log(this.allBranches)
+      }    
     },
     makeElementsEven(arr) {
       if (arr.length > 1 && arr.length % 2 != 0) {
       arr.push(arr[arr.length - 1])
       }
+    },
+    hashDupTxs() {
     }
   }
 }
@@ -252,6 +239,9 @@ export default {
   list-style: none;
   horizontal-align: center;
   -webkit-padding-start: 0px;
+}
+.title{
+  font-size: 40px;
 }
 #app li {
   display: inline;
