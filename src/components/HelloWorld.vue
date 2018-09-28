@@ -2,21 +2,24 @@
   <div id="app">
     <md-card class="txCss">
       <br> <br>
-    <p class="title"> MerkleTree </p>
-    <br><br>
+      <p class="title"> MerkleTree </p>
+      <br><br>
       <ul>
         <li v-for="branch in allBranches">
-           <!--<p>
-             Branch
-             3. Leaf nodes hashed using double-SHA algorithm
-           </p>-->
-          <ul>
-            <li v-for="tx in branch">
-              <md-card md-with-hover class="hashCards"> 
-                {{tx}}
-              </md-card>
-            </li>
-          </ul> <br>
+          <p v-if="branch.length==1">
+            The merkleroot is {{merkleroot}}
+          </p>
+            <ul>
+              <p v-if="branch.length>1 && branch.length%2 != 0"> 
+                Cannot build Merkle Tree for odd number of data elements. <br> 
+                Duplicating the last transaction to achieve an even number of data elements. <br>
+              </p>
+              <li v-for="tx in branch">
+                <md-card md-with-hover class="hashCards"> 
+                  {{tx}}
+                </md-card>
+              </li> <br>
+           </ul> <br>
         </li>
       </ul>
       <ul>
@@ -43,19 +46,19 @@
       </ul>
       <ul>
         <li v-for="tx in txs" v-if="txs.length!=0">
-        <p v-if="txs.length==1">
-          {{message}} <br>
-        </p> 
+          <p v-if="txs.length==1">
+            {{message}} <br>
+          </p> 
           <md-card md-with-hover class="txCards"> 
             {{tx}}
           </md-card> 
         </li> <br>
         <p v-if="txs.length!=0">
-        Transactions to be summarized
+          Transactions to be summarized
         </p>
       </ul>
       <p class="subtitle" v-if="txs.length==0">
-      There are no transactions to be summarized
+        There are no transactions to be summarized
       </p> <br>
     </md-card>
   </div>
@@ -67,7 +70,7 @@ export default {
   name: 'MerkleTree',
   data () {
     return {
-      n: 3, // number of transactions
+      n: 0, // number of transactions
       txs: [
         //list of transactions
         "tx1",
@@ -78,10 +81,11 @@ export default {
         "tx6",
         "tx7",
         "tx8",
-        /*"tx9",
-        "tx10",
+        "tx9",
+        /*"tx10",
         "tx11",*/
       ],
+      final: [],
       txsCopy: [
         /*copy of list of transactions
         "tx1",
@@ -143,10 +147,14 @@ export default {
       }
     },
     async calcBranches() {
-      //calculate the branches 
-      const rep = Math.ceil(Math.log2(this.txsCopy.length))
+      //calculates the first branch by concatenating n & n+1 nodes from hashedtxs[] array.
+      //pushes the resulting branch[] to allBranches[[], [], []] array
+      //checks whether the resulting branch[] has even or odd number of elements
+      //if odd, clones that branch to a new Array oddBranch[]
+      //then, makes the branch[] array even by duplicating the last element 
 
-      for ( let i=0; i <= rep; i++ ) {
+      const repeat = Math.ceil(Math.log2(this.txsCopy.length)) 
+      for(let i =0; i<=repeat; i++) {
         if(this.branch.length == 0) {
           this.hashedtxs.forEach((item, index) => {
             if (index % 2 == 0) {
@@ -154,32 +162,38 @@ export default {
                 sha256(sha256(this.hashedtxs[index].concat(this.hashedtxs[index + 1])))
               )
             }
-          })
-          this.message = `Branch: ${(this.branchCounter += 1)}`;
-          console.log(this.message)
-          console.log(this.branch)
-          this.allBranches.unshift(this.branch);
-          console.log(this.allBranches)
-        } else if(this.branch.length == 1) {
-          this.merkleRoot = this.branch[0]
-          this.message = `The Merkle Root is ${this.merkleRoot}`
-          console.log(this.message)
-        } else if(this.branch.length > 1) {
-          this.branchCopy = this.branch.slice(0)
-          this.branch = []
-          this.branchCopy.forEach((item, index) => {
-            if (index % 2 == 0) {
+          }) 
+          this.allBranches.unshift(this.branch)
+          if(this.branch.length>1 && this.branch.length%2 != 0) {
+            let index = this.allBranches.indexOf(this.branch)
+            let oddBranch = this.branch.slice(0)
+            this.makeElementsEven(this.branch)
+            this.allBranches.splice(index+1, 0, oddBranch);
+          }
+        } 
+        else if(this.branch.length>1 && this.branch.length %2 ==0) {
+          let branchCopy = this.branch.slice(0)
+          this.branch = [];
+          branchCopy.forEach((item, index) => {
+            if(index%2 ==0){
               this.branch.push(
-                sha256(sha256(this.branchCopy[index].concat(this.branchCopy[index + 1])))
+                sha256(sha256(branchCopy[index].concat(branchCopy[index+1])))
               )
             }
           })
-            this.message = `Branch: ${(this.branchCounter += 1)}`;
-            console.log(this.message)
-          console.log(this.branch)
-          this.allBranches.unshift(this.branch)
+          this.allBranches.unshift(this.branch) 
+          if(this.branch.length>1 && this.branch.length%2 != 0) {
+            let index = this.allBranches.indexOf(this.branch)
+            let oddBranch = this.branch.slice(0)
+            this.makeElementsEven(this.branch)
+            this.allBranches.splice(index+1, 0, oddBranch);
+          }
         }
-      }    
+        else if(this.branch.length==1) {
+        this.merkleroot = this.branch[0];
+        console.log(`The merkleroot is ${this.merkleroot}`)
+        }
+      }
     },
     makeElementsEven(arr) {
       if (arr.length > 1 && arr.length % 2 != 0) {
