@@ -3,23 +3,36 @@
     <md-card class="txCss">
       <br> <br>
       <p class="title"> MerkleTree </p>
-      <br><br>
+      <br> <br>
+      <ul>
+        <li>
+          <p> Enter the number of transactions to be summarized <br> </p>
+          <md-field>
+            <md-input ref="n" id="n" v-model="n" @keyup.enter.native="getN()" placeholder="The value of n"></md-input>
+          </md-field>
+          <p v-if="n!=0 && n>1"> Enter the transaction IDs separated by comma <br> </p>
+          <md-field  v-if="n!=0 && n>1">
+            <md-input ref="tx" id="tx" v-model="tx" @keyup.enter.native="getTx()" placeholder="Transaction IDs separated by comma"></md-input>
+          </md-field>
+        </li>
+      </ul>
+    <br>
       <ul>
         <li v-for="branch in allBranches">
           <p v-if="branch.length==1">
             The merkleroot is {{merkleroot}}
           </p>
-            <ul>
-              <p v-if="branch.length>1 && branch.length%2 != 0"> 
-                Cannot build Merkle Tree for odd number of data elements. <br> 
-                Duplicating the last transaction to achieve an even number of data elements. <br>
-              </p>
-              <li v-for="tx in branch">
-                <md-card md-with-hover class="hashCards"> 
-                  {{tx}}
-                </md-card>
-              </li> <br>
-           </ul> <br>
+          <ul>
+            <p v-if="branch.length>1 && branch.length%2 != 0"> 
+              Cannot build Merkle Tree for odd number of data elements. <br> 
+              Duplicating the last transaction to achieve an even number of data elements. <br>
+            </p>
+            <li v-for="tx in branch">
+              <md-card md-with-hover class="hashCards"> 
+                {{tx}}
+              </md-card>
+            </li> <br>
+          </ul> <br>
         </li>
       </ul>
       <ul>
@@ -57,9 +70,9 @@
           Transactions to be summarized
         </p>
       </ul>
-      <p class="subtitle" v-if="txs.length==0">
+      <!--<p class="subtitle" v-if="txs.length==0">
         There are no transactions to be summarized
-      </p> <br>
+      </p> <br> -->
     </md-card>
   </div>
 </template>
@@ -70,10 +83,13 @@ export default {
   name: 'MerkleTree',
   data () {
     return {
-      n: 0, // number of transactions
+      n: "", // number of transactions
+      tx: "", // transaction ID
+      arr: 1,
+      ts: new Date(),
       txs: [
-        //list of transactions
-        "tx1",
+        //list of transaction IDs
+        /*"tx1",
         "tx2",
         "tx3",
         "tx4",
@@ -82,10 +98,9 @@ export default {
         "tx7",
         "tx8",
         "tx9",
-        /*"tx10",
+        "tx10",
         "tx11",*/
       ],
-      final: [],
       txsCopy: [
         /*copy of list of transactions
         "tx1",
@@ -103,34 +118,40 @@ export default {
       hashedtxs: [
         //list of transactions hashed using double-SHA algorithm
         //aka leaf nodes
-      ],
-      xyzBranches:[
-        //test branch
-      ],
+      ], 
       allBranches: [
         //[
         //array containing all the corrected branches
         //],
 	],
-      tempBranches: [
-	//array containing all the branches
-	],
       branch: [
         //list of hashes obtained by concatenating two child nodes and hashing them with double-SHA algorithm
       ],
-      branchCopy: [
-        //copy of branches
-      ],
-      branchCounter: 0, //value depends on the number of transactions
       merkleroot: '', //alphanumeric string
       message: '', //string 
     }
   },
   async created() {
-    await this.hashTxs();
-    await this.calcBranches();
+    //await this.getN();
+    //await this.getTx();
+    //await this.hashTxs();
+    //await this.calcBranches();
   },
   methods: {
+    async getN() {
+      this.n = parseInt(document.getElementById("n").value)
+      console.log(this.n);
+    },
+    async getTx() {
+      this.tx = document.getElementById("tx").value;
+      this.txs = this.tx.split(",")
+      if(this.txs.length != this.n) {
+        console.log("Number of transactions does not match the value of n")
+      }
+      console.log(this.txs);
+      this.hashTxs();
+      this.calcBranches();
+    },
     async hashTxs() {
       //hash the transactions and display the leaf nodes
       if (this.txs.length == 1) {

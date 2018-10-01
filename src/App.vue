@@ -1,16 +1,19 @@
 <template>
   <div id="app">
-       <HelloWorld/>
+    <Merkletree/>
+    <!--<HelloWorld/>-->
   </div>
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld'
+import Merkletree from './components/Merkletree'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    HelloWorld,
+    Merkletree
   }
 }
 </script>
