@@ -1,21 +1,8 @@
 <template>
   <div id="app">
-    <md-card class="txCss">
       <br> <br>
       <p class="title"> MerkleTree </p>
       <br> <br>
-      <ul>
-        <li>
-          <p> Enter the number of transactions to be summarized <br> </p>
-          <md-field>
-            <md-input ref="n" id="n" v-model="n" @keyup.enter.native="getN()" placeholder="The value of n"></md-input>
-          </md-field>
-          <p v-if="n!=0 && n>1"> Enter the transaction IDs separated by comma <br> </p>
-          <md-field  v-if="n!=0 && n>1">
-            <md-input ref="tx" id="tx" v-model="tx" @keyup.enter.native="getTx()" placeholder="Transaction IDs separated by comma"></md-input>
-          </md-field>
-        </li>
-      </ul>
     <br>
       <ul>
         <li v-for="branch in allBranches">
@@ -70,11 +57,24 @@
           Transactions to be summarized
         </p>
       </ul>
+      <span class="input">
+      <ul>
+        <li>
+          <p> Enter the number of transactions to be summarized <br> </p>
+          <md-field>
+            <md-input ref="n" id="n" v-model="n" @keyup.enter.native="getN()" placeholder="The value of n"></md-input>
+          </md-field>
+          <p v-if="n!=0 && n>1">Enter the transaction IDs separated by comma        <br> </p>
+          <md-field  v-if="n!=0 && n>1">
+            <md-input ref="tx" id="tx" v-model="tx" @keyup.enter.native="getTx()" placeholder="Tx IDs separated by comma"></md-input>
+          </md-field>
+        </li>
+      </ul>
+      </span>
       <!--<p class="subtitle" v-if="txs.length==0">
         There are no transactions to be summarized
       </p> <br> -->
-    </md-card>
-  </div>
+     </div>
 </template>
 
 <script>
@@ -143,6 +143,7 @@ export default {
       console.log(this.n);
     },
     async getTx() {
+      this.txs=[];
       this.tx = document.getElementById("tx").value;
       this.txs = this.tx.split(",")
       if(this.txs.length != this.n) {
@@ -285,5 +286,19 @@ export default {
 }
 p{
   display: inline;
-  }
+  text-align: left;
+}
+.input {
+  width: 500px;
+  margin: 3px;
+  display: inline-block;
+  vertical-align: center;
+  color:#2C3539;
+}
+.md-field {
+  padding-left: 80px;
+  text-align:right;
+  width: 100%;
+  display:inline-block;
+}
 </style>
