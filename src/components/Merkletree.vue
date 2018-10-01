@@ -160,6 +160,8 @@ export default {
         this.message = `The Merkle Root is ${this.merkleroot}`  
       }
       else if (this.txs.length > 1){
+        this.txsCopy = [];
+        this.hashedtxs = [];
         this.message = `Transactions to be summarized: ${this.txs}`
         this.txsCopy = Array.from(this.txs)
         this.makeElementsEven(this.txsCopy) 
@@ -176,7 +178,9 @@ export default {
       //then, makes the branch[] array even by duplicating the last element
       //calculates the next branch
 
-      const repeat = Math.ceil(Math.log2(this.txsCopy.length)) 
+      const repeat = Math.ceil(Math.log2(this.txsCopy.length))
+      this.allBranches = [];
+      this.branch = [];
       for(let i =0; i<=repeat; i++) {
         if(this.branch.length == 0) {
           this.hashedtxs.forEach((item, index) => {
