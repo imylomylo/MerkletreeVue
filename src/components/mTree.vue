@@ -1,80 +1,89 @@
 <template>
   <div id="app">
-      <br> <br>
-      <p class="title"> MerkleTree </p>
-      <br> <br>
-    <br>
-      <ul>
-        <li v-for="branch in allBranches">
-          <p v-if="branch.length==1">
-            The merkleroot is {{merkleroot}}
-          </p>
+    <form novalidate class="md-layout" @submit.prevent="generateMerkletree"> 
+      <md-card>
+        <md-card-header>
+          <div class="md-title"> Merkletree </div>
+        </md-card-header>
+        <md-card-content>
+          <md-field>
+            <label for="n">Number of transactions</label>
+            <md-input id="n" v-model="n" @keyup.enter.native="getN()" placeholder="The value of n"></md-input>
+            <span class="md-error" v-if="typeof(n)!='number'"> Invalid value </span>
+          </md-field>
+          <md-card-expand-trigger>
+            <md-button class="md-icon-button">
+              <md-icon>keyboard_arrow_right</md-icon>
+            </md-button>
+          </md-card-expand-trigger>
+        </md-card-actions>
+        <md-card-expand-content>
+          <md-card-content>
+            <md-field  v-for="value in n" :key="value">
+              <label>Tx ID {{value}}</label>
+              <md-input :id="'tx'+value" @keyup.enter.native="getTx()" placeholder="enter"></md-input>
+            </md-field>
+          </md-card-content>
+          <md-button id="merkleButton" @click="generateMerkletree"> Generate Merkle Tree </md-button>
           <ul>
-            <p v-if="branch.length>1 && branch.length%2 != 0"> 
-              Cannot build Merkle Tree for odd number of data elements. <br> 
-              Duplicating the last transaction to achieve an even number of data elements. <br>
-            </p>
-            <li v-for="tx in branch">
+            <li v-for="branch in allBranches">
+              <p v-if="branch.length==1">
+                The merkleroot is {{merkleroot}}
+              </p>
+              <ul>
+                <p v-if="branch.length>1 && branch.length%2 != 0"> 
+                  Cannot build Merkle Tree for odd number of data elements. <br> 
+                  Duplicating the last transaction to achieve an even number of data elements. <br>
+                </p>
+                <li v-for="tx in branch">
+                  <md-card md-with-hover class="hashCards"> 
+                    {{tx}}
+                  </md-card>
+                </li> <br>
+              </ul> <br>
+            </li>
+          </ul>
+          <ul>
+            <li v-for="tx in hashedtxs">
               <md-card md-with-hover class="hashCards"> 
+                {{tx}}
+              </md-card> 
+            </li> <br>
+            <p v-if="hashedtxs.length!=0">
+              Leaf nodes hashed using double-SHA256 algorithm
+            </p>
+
+          </ul>
+          <ul v-if="txs.length>1 && txs.length%2!=0">
+            <li v-for="tx in txsCopy">
+              <md-card md-with-hover class="txCards"> 
                 {{tx}}
               </md-card>
             </li> <br>
-          </ul> <br>
-        </li>
-      </ul>
-      <ul>
-        <li v-for="tx in hashedtxs">
-          <md-card md-with-hover class="hashCards"> 
-            {{tx}}
-          </md-card> 
-        </li> <br>
-        <p v-if="hashedtxs.length!=0">
-          Leaf nodes hashed using double-SHA256 algorithm
-        </p>
-
-      </ul>
-      <ul v-if="txs.length>1 && txs.length%2!=0">
-        <li v-for="tx in txsCopy">
-          <md-card md-with-hover class="txCards"> 
-            {{tx}}
-          </md-card>
-        </li> <br>
-        <p>
-          Cannot build Merkle Tree for odd number of data elements. <br> 
-          Duplicating the last transaction to achieve an even number of data elements.
-        </p>
-      </ul>
-      <ul>
-        <li v-for="tx in txs" v-if="txs.length!=0">
-          <p v-if="txs.length==1">
-            {{message}} <br>
-          </p> 
-          <md-card md-with-hover class="txCards"> 
-            {{tx}}
-            </md-card> 
-        </li> <br>
-        <p v-if="txs.length!=0">
-          Transactions to be summarized
-        </p>
-      </ul>
-      <span class="input">
-      <ul>
-        <li>
-          <p> Enter the number of transactions to be summarized <br> </p>
-          <md-field>
-            <md-input ref="n" id="n" v-model="n" @keyup.enter.native="getN()" placeholder="The value of n"></md-input>
-          </md-field>
-          <p v-if="n!=0 && n>1">Enter the transaction IDs separated by comma        <br> </p>
-          <md-field  v-if="n!=0 && n>1">
-            <md-input ref="tx" id="tx" v-model="tx" @keyup.enter.native="getTx()" placeholder="Tx IDs separated by comma"></md-input>
-          </md-field>
-        </li>
-      </ul>
-      </span>
-      <!--<p class="subtitle" v-if="txs.length==0">
-        There are no transactions to be summarized
-      </p> <br> -->
-     </div>
+            <p>
+              Cannot build Merkle Tree for odd number of data elements. <br> 
+              Duplicating the last transaction to achieve an even number of data elements.
+            </p>
+          </ul>
+          <ul>
+            <li v-for="tx in txs" v-if="txs.length!=0">
+              <p v-if="txs.length==1">
+                {{message}} <br>
+              </p> 
+              <md-card md-with-hover class="txCards"> 
+                {{tx}}
+              </md-card> 
+            </li> <br>
+            <p v-if="txs.length!=0">
+              Transactions to be summarized
+            </p>
+          </ul>
+        </md-card-expand-content>
+      </md-card-expand>
+      </md-card-content>
+      </md-card>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -123,7 +132,7 @@ export default {
         //[
         //array containing all the corrected branches
         //],
-	],
+      ],
       branch: [
         //list of hashes obtained by concatenating two child nodes and hashing them with double-SHA algorithm
       ],
@@ -132,26 +141,23 @@ export default {
     }
   },
   async created() {
-    await this.getN();
-    await this.getTx();
-    //await this.hashTxs();
-    //await this.calcBranches();
   },
   methods: {
-    async getN() {
-      this.n = parseInt(document.getElementById("n").value)
-      console.log(this.n);
-    },
-    async getTx() {
-      this.txs=[];
-      this.tx = document.getElementById("tx").value;
-      this.txs = this.tx.split(",")
-      if(this.txs.length != this.n) {
-        console.log("Number of transactions does not match the value of n")
-      }
+    async generateMerkletree() {
       console.log(this.txs);
       this.hashTxs();
       this.calcBranches();
+    },
+    async getN() {
+      this.n = parseInt(document.getElementById("n").value) 
+    },
+    async getTx() {
+      this.txs=[];
+      for(let i=1; i<=this.n; i++) {
+        let tx = document.getElementById("tx"+i).value;
+        this.txs.push(tx);
+      }
+      console.log(this.txs);
     },
     async hashTxs() {
       //hash the transactions and display the leaf nodes
@@ -217,23 +223,25 @@ export default {
           }
         }
         else if(this.branch.length==1) {
-        this.merkleroot = this.branch[0];
-        console.log(`The merkleroot is ${this.merkleroot}`)
+          this.merkleroot = this.branch[0];
+          console.log(`The merkleroot is ${this.merkleroot}`)
         }
       }
     },
     makeElementsEven(arr) {
       if (arr.length > 1 && arr.length % 2 != 0) {
-      arr.push(arr[arr.length - 1])
+        arr.push(arr[arr.length - 1])
       }
     },
-    hashDupTxs() {
-    }
   }
 }
 </script>
 
 <style>
+.md-card {
+  width:100%;
+  height:100%;
+}
 .txCss {
   text-align: center;
   border-radius: 2px;
