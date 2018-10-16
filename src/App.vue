@@ -22,12 +22,11 @@ export default {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css?family=Merriweather:400i,700i');
-
-#app {
-  font-family:'Merriweather', serif;
-  text-align: center;
-  color: #2C3539;
-  margin-top: 60px;
+.label {
+  font-size: 1vw;
 }
+.big {
+font-size: 1vw;
+}
+
 </style>

@@ -207,7 +207,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .txCss {
   text-align: center;
   border-radius: 2px;

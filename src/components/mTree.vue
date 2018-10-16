@@ -1,88 +1,74 @@
 <template>
   <div id="app">
-    <form novalidate class="md-layout" @submit.prevent="generateMerkletree"> 
-      <md-card>
-        <md-card-header>
-          <div class="md-title"> Merkletree </div>
-        </md-card-header>
-        <md-card-content>
-          <md-field>
-            <label for="n">Number of transactions</label>
-            <md-input id="n" v-model="n" @keyup.enter.native="getN()" placeholder="The value of n"></md-input>
-            <span class="md-error" v-if="typeof(n)!='number'"> Invalid value </span>
-          </md-field>
-          <md-card-expand-trigger>
-            <md-button class="md-icon-button">
-              <md-icon>keyboard_arrow_right</md-icon>
-            </md-button>
-          </md-card-expand-trigger>
-        </md-card-actions>
-        <md-card-expand-content>
-          <md-card-content>
-            <md-field  v-for="value in n" :key="value">
-              <label>Tx ID {{value}}</label>
-              <md-input :id="'tx'+value" @keyup.enter.native="getTx()" placeholder="enter"></md-input>
-            </md-field>
-          </md-card-content>
-          <md-button id="merkleButton" @click="generateMerkletree"> Generate Merkle Tree </md-button>
+    <div id="header">
+      <div class="md-title"> Merkletree </div>
+    </div> <br> <br>
+    <div id="tree">
+      <ul>
+        <li v-for="branch in allBranches">
+          <p v-if="branch.length==1">
+            The merkleroot is {{merkleroot}} <br> <br>
+          </p>
           <ul>
-            <li v-for="branch in allBranches">
-              <p v-if="branch.length==1">
-                The merkleroot is {{merkleroot}}
-              </p>
-              <ul>
-                <p v-if="branch.length>1 && branch.length%2 != 0"> 
-                  Cannot build Merkle Tree for odd number of data elements. <br> 
-                  Duplicating the last transaction to achieve an even number of data elements. <br>
-                </p>
-                <li v-for="tx in branch">
-                  <md-card md-with-hover class="hashCards"> 
-                    {{tx}}
-                  </md-card>
-                </li> <br>
-              </ul> <br>
-            </li>
-          </ul>
-          <ul>
-            <li v-for="tx in hashedtxs">
+            <p v-if="branch.length>1 && branch.length%2 != 0"> <br> 
+              Cannot build Merkle Tree for odd number of data elements. <br> 
+              Duplicating the last transaction to achieve an even number of data elements. <br> <br>
+            </p>
+            <li v-for="tx in branch">
               <md-card md-with-hover class="hashCards"> 
                 {{tx}}
-              </md-card> 
-            </li> <br>
-            <p v-if="hashedtxs.length!=0">
-              Leaf nodes hashed using double-SHA256 algorithm
-            </p>
-
-          </ul>
-          <ul v-if="txs.length>1 && txs.length%2!=0">
-            <li v-for="tx in txsCopy">
-              <md-card md-with-hover class="txCards"> 
-                {{tx}}
               </md-card>
-            </li> <br>
-            <p>
-              Cannot build Merkle Tree for odd number of data elements. <br> 
-              Duplicating the last transaction to achieve an even number of data elements.
-            </p>
+            </li>
           </ul>
-          <ul>
-            <li v-for="tx in txs" v-if="txs.length!=0">
-              <p v-if="txs.length==1">
-                {{message}} <br>
-              </p> 
-              <md-card md-with-hover class="txCards"> 
-                {{tx}}
-              </md-card> 
-            </li> <br>
-            <p v-if="txs.length!=0">
-              Transactions to be summarized
-            </p>
-          </ul>
-        </md-card-expand-content>
-      </md-card-expand>
-      </md-card-content>
+        </li>
+      </ul>
+      <ul>
+        <li v-for="tx in hashedtxs">
+          <md-card md-with-hover class="hashCards"> 
+            {{tx}}
+          </md-card> 
+        </li> <br>
+        <p v-if="hashedtxs.length!=0"> <br>
+          Leaf nodes hashed using double-SHA256 algorithm
+        </p>
+      </ul>
+      <ul v-if="txs.length>1 && txs.length%2!=0">
+        <li v-for="tx in txsCopy">
+          <md-card md-with-hover class="hashCards"> 
+            {{tx}}
+          </md-card>
+        </li> <br>
+        <p>
+          Cannot build Merkle Tree for odd number of data elements. <br> 
+          Duplicating the last transaction to achieve an even number of data elements.
+        </p>
+      </ul>
+      <ul>
+        <li v-for="tx in txs" v-if="txs.length!=0">
+          <p v-if="txs.length==1">
+            {{message}} <br>
+          </p> 
+        </li>
+      </ul>
+    </div>
+    <p v-if="n>0"> 2. Enter the transaction IDs <br>
+      <small> Hit enter after entering your last tx ID </small> <br> <br>
+      <md-card class="hashCards" v-for="value in n" :key="value">
+        <md-field class="txField">
+          <label class="big">Tx ID {{value}}</label>
+          <md-input :id="'tx'+value" @keyup.enter.native="getTx()" placeholder="Tx ID"></md-input>  <br>
+        </md-field>
       </md-card>
-    </form>
+    </p>
+    <br>
+    <p class="inputN"> 1. Enter the number of transactions <br> <br>
+      <md-field class="nField">
+        <label class="big">The value of n</label>
+        <md-input id="n" v-model="n" type="number" @keyup.enter.native="getN()" placeholder="n"></md-input>
+      </md-field>
+    </p>
+    <br><br><br>
+
   </div>
 </template>
 
@@ -143,13 +129,11 @@ export default {
   async created() {
   },
   methods: {
-    async generateMerkletree() {
-      console.log(this.txs);
-      this.hashTxs();
-      this.calcBranches();
-    },
     async getN() {
-      this.n = parseInt(document.getElementById("n").value) 
+      this.n = parseInt(document.getElementById("n").value)
+      if(this.n==0) {
+        alert("There are no transactions to be summarized");
+      }
     },
     async getTx() {
       this.txs=[];
@@ -157,7 +141,8 @@ export default {
         let tx = document.getElementById("tx"+i).value;
         this.txs.push(tx);
       }
-      console.log(this.txs);
+      this.hashTxs();
+      this.calcBranches();
     },
     async hashTxs() {
       //hash the transactions and display the leaf nodes
@@ -178,7 +163,7 @@ export default {
     },
     async calcBranches() {
       //calculates the first branch by concatenating n & n+1 nodes from hashedtxs[] array.
-      //pushes the resulting branch[] to allBranches[[], [], []] array
+        //pushes the resulting branch[] to allBranches[[], [], []] array
       //checks whether the resulting branch[] has even or odd number of elements
       //if odd, clones that branch to a new Array oddBranch[]
       //then, makes the branch[] array even by duplicating the last element
@@ -237,10 +222,42 @@ export default {
 }
 </script>
 
-<style>
-.md-card {
-  width:100%;
-  height:100%;
+<style scoped>
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+#app {
+  color: #3457D5;
+  background: #fff;
+  margin-top: -20px;
+  text-align: center;
+  height: 960px;
+  overflow: auto;
+  font-family: 'Montserrat', sans-serif; 
+}
+#header {
+  margin-top: 40px;
+}
+.md-title {
+  font-size:2vw;
+  letter-spacing: -3px; 
+}
+.md-input {
+  text-align: left;
+  overflow: scroll;
+}
+.nField {
+  width: 25%;
+  margin: auto;
+}
+.inputCard {
+  width: 40%;
+  margin: auto;
+}
+.txField {
+  padding: 25px;
+}
+.md-button {
+
 }
 .txCss {
   text-align: center;
@@ -248,7 +265,7 @@ export default {
 }
 .txCards {
   display: inline-block;
-  height: 45px;
+  height: 50px;
   width: 50px;
   border-radius: 2px;
   text-align: center;
@@ -260,8 +277,8 @@ export default {
 .hashCards {
   word-wrap: break-word;
   display: inline-block;
-  height: 135px;
-  width: 120px;
+  height: 120px;
+  width: 150px;
   overflow: visible;
   border-radius: 2px;
   text-align: center;
@@ -271,26 +288,10 @@ export default {
   vertical-align: middle;
   padding:10px;
 }
-.arrowCards {
-  margin-top: 100px;
-  display: inline-block; 
-  width: 100px;
-  border-radius: 2px;
-  margin: 90px;
-  position: initial;
-}
-.leaves {
-  width: 50px;
-  height: 50px;
-  text-align: center;
-}
 #app ul {
   list-style: none;
   horizontal-align: center;
   -webkit-padding-start: 0px;
-}
-.title{
-  font-size: 40px;
 }
 #app li {
   display: inline;
@@ -299,18 +300,5 @@ export default {
 p{
   display: inline;
   text-align: left;
-}
-.input {
-  width: 500px;
-  margin: 3px;
-  display: inline-block;
-  vertical-align: center;
-  color:#2C3539;
-}
-.md-field {
-  padding-left: 80px;
-  text-align:right;
-  width: 100%;
-  display:inline-block;
 }
 </style>
