@@ -10,7 +10,10 @@
             The merkleroot is {{merkleroot}} <br> <br>
           </p>
           <ul>
-            <p v-if="branch.length>1 && branch.length%2 != 0"> <br> 
+            <p v-if="branch.length>1 && branch.length%2 != 0">
+                        <br>
+          <md-icon>keyboard_arrow_up</md-icon>
+              <br> 
               Cannot build Merkle Tree for odd number of data elements. <br> 
               Duplicating the last transaction to achieve an even number of data elements. <br> <br>
             </p>
@@ -28,7 +31,10 @@
             {{tx}}
           </md-card> 
         </li> <br>
-        <p v-if="hashedtxs.length!=0"> <br>
+        <p v-if="hashedtxs.length!=0"> 
+          <br>
+          <md-icon>keyboard_arrow_up</md-icon>
+          <br>
           Leaf nodes hashed using double-SHA256 algorithm
         </p>
       </ul>
@@ -38,7 +44,10 @@
             {{tx}}
           </md-card>
         </li> <br>
-        <p>
+        <p> 
+          <br>
+          <md-icon>keyboard_arrow_up</md-icon>
+          <br>
           Cannot build Merkle Tree for odd number of data elements. <br> 
           Duplicating the last transaction to achieve an even number of data elements.
         </p>
@@ -52,19 +61,21 @@
       </ul>
     </div>
     <p v-if="n>0"> 2. Enter the transaction IDs <br>
-      <small> Hit enter after entering your last tx ID </small> <br> <br>
       <md-card class="hashCards" v-for="value in n" :key="value">
         <md-field class="txField">
-          <label class="big">Tx ID {{value}}</label>
-          <md-input :id="'tx'+value" @keyup.enter.native="getTx()" placeholder="Tx ID"></md-input>  <br>
+          <label>Tx ID {{value}}</label>
+          <md-input :id="'tx'+value"
+            v-on:change="getTx()"
+            placeholder="Tx ID"></md-input>  <br>
         </md-field>
       </md-card>
     </p>
-    <br>
-    <p class="inputN"> 1. Enter the number of transactions <br> <br>
+    <br><br>
+
+    <p class="inputN"> 1. Enter the number of transactions <br>
       <md-field class="nField">
         <label class="big">The value of n</label>
-        <md-input id="n" v-model="n" type="number" @keyup.enter.native="getN()" placeholder="n"></md-input>
+        <md-input id="n" v-model="n" type="number" v-on:change="getN()" placeholder="n"></md-input>
       </md-field>
     </p>
     <br><br><br>
@@ -133,6 +144,8 @@ export default {
       this.n = parseInt(document.getElementById("n").value)
       if(this.n==0) {
         alert("There are no transactions to be summarized");
+      } else if(this.n<0) {
+        alert("Invalid input")
       }
     },
     async getTx() {
@@ -223,16 +236,14 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css?family=Montserrat');
+@import url('https://fonts.googleapis.com/css?family=Lato');
 
 #app {
-  color: #3457D5;
-  background: #fff;
   margin-top: -20px;
   text-align: center;
   height: 960px;
   overflow: auto;
-  font-family: 'Montserrat', sans-serif; 
+  font-family: 'Lato', sans-serif; 
 }
 #header {
   margin-top: 40px;
@@ -246,7 +257,7 @@ export default {
   overflow: scroll;
 }
 .nField {
-  width: 25%;
+  width: 20%;
   margin: auto;
 }
 .inputCard {
@@ -287,15 +298,6 @@ export default {
   margin: 10px;
   vertical-align: middle;
   padding:10px;
-}
-#app ul {
-  list-style: none;
-  horizontal-align: center;
-  -webkit-padding-start: 0px;
-}
-#app li {
-  display: inline;
-  horizontal-align: center;
 }
 p{
   display: inline;

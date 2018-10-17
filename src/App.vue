@@ -22,11 +22,13 @@ export default {
 </script>
 
 <style>
-.label {
-  font-size: 1vw;
+#app ul {
+  list-style: none;
+  horizontal-align: center;
+  -webkit-padding-start: 0px;
 }
-.big {
-font-size: 1vw;
+#app li {
+  display: inline;
+  horizontal-align: center;
 }
-
 </style>
