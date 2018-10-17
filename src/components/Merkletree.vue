@@ -1,92 +1,143 @@
 <template>
   <div id="app">
-      <br> <br>
-      <p class="title"> MerkleTree </p>
-      <br> <br>
-    <br>
-      <ul>
-        <li v-for="branch in allBranches">
-          <p v-if="branch.length==1">
-            The merkleroot is {{merkleroot}}
+    <div class="md-title"> Merkletree </div>
+    <ul>
+      <li 
+        v-for="branch in allBranches">
+        <p 
+          v-if="branch.length==1">
+          <br>
+          <br>
+          The merkleroot is {{merkleroot}}
+          <br>
+          <br>
+        </p>
+        <ul>
+          <p 
+            v-if="branch.length>1 && branch.length%2 != 0">
+            <br>
+            <md-icon>
+              keyboard_arrow_up
+            </md-icon>
+            <br>
+            Cannot build Merkle Tree for odd number of data elements. <br> 
+            Duplicating the last transaction to achieve an even number of data elements. <br><br>
           </p>
-          <ul>
-            <p v-if="branch.length>1 && branch.length%2 != 0"> 
-              Cannot build Merkle Tree for odd number of data elements. <br> 
-              Duplicating the last transaction to achieve an even number of data elements. <br>
-            </p>
-            <li v-for="tx in branch">
-              <md-card md-with-hover class="hashCards"> 
-                {{tx}}
-              </md-card>
-            </li> <br>
-          </ul> <br>
-        </li>
-      </ul>
-      <ul>
-        <li v-for="tx in hashedtxs">
-          <md-card md-with-hover class="hashCards"> 
-            {{tx}}
-          </md-card> 
-        </li> <br>
-        <p v-if="hashedtxs.length!=0">
-          Leaf nodes hashed using double-SHA256 algorithm
-        </p>
-
-      </ul>
-      <ul v-if="txs.length>1 && txs.length%2!=0">
-        <li v-for="tx in txsCopy">
-          <md-card md-with-hover class="txCards"> 
-            {{tx}}
-          </md-card>
-        </li> <br>
-        <p>
-          Cannot build Merkle Tree for odd number of data elements. <br> 
-          Duplicating the last transaction to achieve an even number of data elements.
-        </p>
-      </ul>
-      <ul>
-        <li v-for="tx in txs" v-if="txs.length!=0">
-          <p v-if="txs.length==1">
-            {{message}} <br>
-          </p> 
-          <md-card md-with-hover class="txCards"> 
-            {{tx}}
-            </md-card> 
-        </li> <br>
-        <p v-if="txs.length!=0">
-          Transactions to be summarized
-        </p>
-      </ul>
-      <span class="input">
-      <ul>
-        <li>
-          <p> Enter the number of transactions to be summarized <br> </p>
-          <md-field>
-            <md-input ref="n" id="n" v-model="n" @keyup.enter.native="getN()" placeholder="The value of n"></md-input>
-          </md-field>
-          <p v-if="n!=0 && n>1">Enter the transaction IDs separated by comma        <br> </p>
-          <md-field  v-if="n!=0 && n>1">
-            <md-input ref="tx" id="tx" v-model="tx" @keyup.enter.native="getTx()" placeholder="Tx IDs separated by comma"></md-input>
-          </md-field>
-        </li>
-      </ul>
-      </span>
-      <!--<p class="subtitle" v-if="txs.length==0">
-        There are no transactions to be summarized
-      </p> <br> -->
-     </div>
+          <li
+            v-for="tx in branch">
+            <transition name="highlight" mode="out-in">
+            <md-card 
+		:key="tx"		
+		md-with-hover 
+		class="hashCards"> 
+              {{tx}}
+            </md-card>
+            </transition>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <ul>
+      <li 
+        v-for="tx in hashedtxs">
+        <transition name="highlight" mode="out-in">
+        <md-card 
+          :key="tx"
+          md-with-hover 
+          class="hashCards">
+          {{tx}}
+        </md-card> 
+        </transition>
+      </li> 
+      <br>
+      <p 
+        v-if="hashedtxs.length!=0"> 
+        <br>
+        <md-icon>
+          keyboard_arrow_up
+        </md-icon>
+        <br>
+        Leaf nodes hashed using double-SHA256 algorithm
+      </p>
+    </ul>
+    <ul
+      v-if="txs.length>1 && txs.length%2!=0">
+      <li 
+        v-for="tx in txsCopy">
+        <md-card 
+          md-with-hover 
+          id="inputCard"
+          class="hashCards"> 
+          {{tx}}
+        </md-card>
+      </li>
+      <br>
+      <p> 
+        <br>
+        <md-icon>
+          keyboard_arrow_up
+        </md-icon>
+        <br>
+        Cannot build Merkle Tree for odd number of data elements. <br> 
+        Duplicating the last transaction to achieve an even number of data elements. <br> <br>
+      </p>
+    </ul>
+    <ul>
+      <li
+        v-for="tx in txs" 
+        v-if="txs.length!=0">
+        <p 
+          v-if="txs.length==1">
+          {{message}} <br>
+        </p> 
+      </li>
+    </ul>
+    <p 
+      v-if="n>0"> 
+      2. Enter the transaction IDs
+      <br>
+      <md-card 
+        class="inputCards" 
+        v-for="value in n" 
+        :key="value">
+        <md-field 
+          class="txField">
+          <label>
+            Tx ID {{value}}
+          </label>
+          <md-input 
+            :id="'tx'+value"
+            v-on:change="getTx()"
+            placeholder="Tx ID"></md-input>
+        </md-field>
+      </md-card>
+    </p>
+    <p> <br><br> 1. Enter the number of transactions <br>
+      <md-field
+        class="nField">
+        <label>
+          The value of n
+        </label>
+        <md-input 
+          id="n"
+          v-model="n"
+          type="number"
+          :change="getN()"  
+          placeholder="n">
+        </md-input>
+      </md-field>
+    </p>
+  </div>
 </template>
 
 <script>
 const sha256 = require("js-sha256").sha256
+
 export default {
   name: 'MerkleTree',
   data () {
     return {
       n: "", // number of transactions
-      tx: "", // transaction ID
-      arr: 1,
-      ts: new Date(),
       txs: [
         //list of transaction IDs
         /*"tx1",
@@ -103,53 +154,45 @@ export default {
       ],
       txsCopy: [
         /*copy of list of transactions
-        "tx1",
-        "tx2",
-        "tx3",
-        "tx4",
-        "tx5",
-        "tx6",
-        "tx7",
-        "tx8",
-        "tx9",
-        "tx10",
-        "tx11",*/
+         */
       ],
       hashedtxs: [
         //list of transactions hashed using double-SHA algorithm
         //aka leaf nodes
-      ], 
+      ],
+      allHashes: [
+        // array containing all the hashes.
+      ],
       allBranches: [
         //[
         //array containing all the corrected branches
         //],
-	],
+      ],
       branch: [
         //list of hashes obtained by concatenating two child nodes and hashing them with double-SHA algorithm
       ],
       merkleroot: '', //alphanumeric string
-      message: '', //string 
+      message: '', //string
+      change: false
     }
-  },
-  async created() {
-    await this.getN();
-    await this.getTx();
-    //await this.hashTxs();
-    //await this.calcBranches();
   },
   methods: {
     async getN() {
       this.n = parseInt(document.getElementById("n").value)
-      console.log(this.n);
+      if(this.n==0) {
+        alert("There are no transactions to be summarized");
+      } else if(this.n<0) {
+        alert("Invalid input")
+      }
     },
     async getTx() {
       this.txs=[];
-      this.tx = document.getElementById("tx").value;
-      this.txs = this.tx.split(",")
-      if(this.txs.length != this.n) {
-        console.log("Number of transactions does not match the value of n")
+      for(let i=1; i<=this.n; i++) {
+        let tx = document.getElementById("tx"+i).value;
+        if(tx.length!=0) {
+        this.txs.push(tx);
+        }
       }
-      console.log(this.txs);
       this.hashTxs();
       this.calcBranches();
     },
@@ -167,6 +210,9 @@ export default {
         this.makeElementsEven(this.txsCopy) 
         for (const tx of this.txsCopy) {
           this.hashedtxs.push(sha256(sha256(tx)))
+        }
+        for (const hash of this.hashedtxs) {
+          this.allHashes.push(hash);
         }
       }
     },
@@ -208,7 +254,7 @@ export default {
               )
             }
           })
-          this.allBranches.unshift(this.branch) 
+          this.allBranches.unshift(this.branch)
           if(this.branch.length>1 && this.branch.length%2 != 0) {
             let index = this.allBranches.indexOf(this.branch)
             let oddBranch = this.branch.slice(0)
@@ -217,72 +263,37 @@ export default {
           }
         }
         else if(this.branch.length==1) {
-        this.merkleroot = this.branch[0];
-        console.log(`The merkleroot is ${this.merkleroot}`)
+          this.merkleroot = this.branch[0];
+          console.log(`The merkleroot is ${this.merkleroot}`)
         }
       }
     },
     makeElementsEven(arr) {
       if (arr.length > 1 && arr.length % 2 != 0) {
-      arr.push(arr[arr.length - 1])
+        arr.push(arr[arr.length - 1])
       }
     },
-    hashDupTxs() {
-    }
   }
 }
 </script>
 
 <style scoped>
-.txCss {
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+#app {
+  margin-top: 10px;
   text-align: center;
-  border-radius: 2px;
+  height: 960px;
+  overflow: auto;
+  font-family: 'Lato', sans-serif; 
 }
-.txCards {
-  display: inline-block;
-  height: 45px;
-  width: 50px;
-  border-radius: 2px;
-  text-align: center;
-  color: #0c2636;
-  margin: 10px;
-  vertical-align: middle;
-  line-height: 45px;
-}
-.hashCards {
-  word-wrap: break-word;
-  display: inline-block;
-  height: 135px;
-  width: 120px;
-  overflow: visible;
-  border-radius: 2px;
-  text-align: center;
-  color: #0c2636;
-  margin-top:0;
-  margin: 10px;
-  vertical-align: middle;
-  padding:10px;
-}
-.arrowCards {
-  margin-top: 100px;
-  display: inline-block; 
-  width: 100px;
-  border-radius: 2px;
-  margin: 90px;
-  position: initial;
-}
-.leaves {
-  width: 50px;
-  height: 50px;
-  text-align: center;
+.md-title {
+  font-size: 2vw;
 }
 #app ul {
   list-style: none;
   horizontal-align: center;
   -webkit-padding-start: 0px;
-}
-.title{
-  font-size: 40px;
 }
 #app li {
   display: inline;
@@ -292,17 +303,46 @@ p{
   display: inline;
   text-align: left;
 }
-.input {
-  width: 500px;
-  margin: 3px;
+.hashCards {
+  word-wrap: break-word;
   display: inline-block;
-  vertical-align: center;
-  color:#2C3539;
+  height: 120px;
+  width: 150px;
+  overflow: visible;
+  border-radius: 2px;
+  text-align: center;
+  color: #0c2636;
+  margin-top:0;
+  margin: 10px;
+  vertical-align: middle;
+  padding:10px;
 }
-.md-field {
-  padding-left: 80px;
-  text-align:right;
-  width: 100%;
-  display:inline-block;
+.inputCards {
+  word-wrap: break-word;
+  display: inline-block;
+  height: 120px;
+  width: 150px;
+  overflow: visible;
+  border-radius: 2px;
+  text-align: center;
+  color: #0c2636;
+  margin-top:0;
+  margin: 10px;
+  vertical-align: middle;
+  padding:10px;
 }
+.txField {
+  padding: 25px;
+}
+.nField {
+  width: 20%;
+  margin: auto;
+}
+.highlight-active {
+  transition: all 10s ease;
+}
+.highlight-enter {
+  background: yellow;
+}
+
 </style>

@@ -40,7 +40,7 @@
       </ul>
       <ul v-if="txs.length>1 && txs.length%2!=0">
         <li v-for="tx in txsCopy">
-          <md-card md-with-hover class="hashCards"> 
+          <md-card md-with-hover id="inputCard"class="hashCards"> 
             {{tx}}
           </md-card>
         </li> <br>
@@ -75,7 +75,12 @@
     <p class="inputN"> 1. Enter the number of transactions <br>
       <md-field class="nField">
         <label class="big">The value of n</label>
-        <md-input id="n" v-model="n" type="number" v-on:change="getN()" placeholder="n"></md-input>
+        <md-input 
+          id="n"
+          v-model="n"
+          type="number"
+          :change="getN()"  
+          placeholder="n"></md-input>
       </md-field>
     </p>
     <br><br><br>
@@ -149,10 +154,18 @@ export default {
       }
     },
     async getTx() {
+      let oldTxs = this.txs;
+      console.log(oldTxs);
       this.txs=[];
       for(let i=1; i<=this.n; i++) {
         let tx = document.getElementById("tx"+i).value;
         this.txs.push(tx);
+      }
+      for(let i=0; i<=this.n; i++) {
+        if(oldTxs[i]!=this.txs[i]) {
+          let change = document.getElementById("inputCard");
+          change.style.background = "#345";
+        }
       }
       this.hashTxs();
       this.calcBranches();
@@ -176,7 +189,7 @@ export default {
     },
     async calcBranches() {
       //calculates the first branch by concatenating n & n+1 nodes from hashedtxs[] array.
-        //pushes the resulting branch[] to allBranches[[], [], []] array
+      //pushes the resulting branch[] to allBranches[[], [], []] array
       //checks whether the resulting branch[] has even or odd number of elements
       //if odd, clones that branch to a new Array oddBranch[]
       //then, makes the branch[] array even by duplicating the last element
@@ -302,5 +315,8 @@ export default {
 p{
   display: inline;
   text-align: left;
+}
+.change {
+  background: #000;
 }
 </style>
