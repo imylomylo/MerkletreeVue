@@ -178,7 +178,7 @@ export default {
   },
   methods: {
     async getN() {
-      this.n = parseInt(document.getElementById("n").value)
+      this.n = parseInt(this.$data.n)
       if(this.n==0) {
         alert("There are no transactions to be summarized");
       } else if(this.n<0) {
@@ -342,7 +342,7 @@ p{
   transition: all 10s ease;
 }
 .highlight-enter {
-  background: yellow;
+  background: yellow !important;
 }
 
 </style>
